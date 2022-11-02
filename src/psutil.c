@@ -9,13 +9,15 @@
 #include <sys/wait.h>
 
 void
-set_process_env_path(const unsigned int path_count, ...)
+pre_excecute_set_path (const unsigned int path_count, ...)
 {
 
 }
 
 int
-execute_command(const char *command, const unsigned int arg_count, ...)
+execute_command(const char *command, char *out_error_msg, const uint16_t error_size,
+				char *out_cmd_output, const uint16_t cmd_output_size,
+				const unsigned int arg_count, ...)
 {
 	va_list va_ptr;
 	pid_t pid;
@@ -51,13 +53,10 @@ execute_command(const char *command, const unsigned int arg_count, ...)
 		exit(retval);
 	} else {
 		close (pipe_fd[1]);
+		if (cmd_output_size > 0 && out_cmd_output != NULL){
+			read (pipe_fd[0], out_cmd_output, cmd_output_size);
+		}
 		waitpid(pid, &status, 0);
 	}
 	return status;
-}
-
-const char *
-get_error_message(void)
-{
-	return "\0";
 }
