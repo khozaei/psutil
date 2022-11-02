@@ -1,4 +1,6 @@
 #include "psutil.h"
+
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -18,16 +20,16 @@ execute_command(const char *command, const unsigned int arg_count, ...)
 	va_list va_ptr;
 	pid_t pid;
 	int status;
-	int retval;
-	const char *argument_array[arg_count];
+	char *argument_array[arg_count + 2];
 
+	argument_array[0] = (char *)command;
 	va_start(va_ptr, arg_count);
-	for(int i = 0; i < arg_count; i++){
-		argument_array[i] = va_arg(va_ptr, const char *);
+	for(int i = 1; i <= arg_count; i++){
+		argument_array[i] = va_arg(va_ptr, char *);
 	}
 	va_end(va_ptr);
-	//argument_array[arg_count] = (const char *)NULL;
-	for(int i = 0; i <= arg_count; i++){
+	argument_array[arg_count + 1] = (char *)NULL;
+	for(int i = 0; i <= arg_count + 1; i++){
 		printf(">%s\t",argument_array[i]);		
 	}
 	printf("\n");
@@ -37,14 +39,15 @@ execute_command(const char *command, const unsigned int arg_count, ...)
 		return 1;
 	}
 	else if (pid == 0) {
-		retval = execlp(command, command, argument_array,(const char *)NULL);
+		int retval;
+
+		retval = execvp(command, &argument_array[0]);
 		fprintf(stderr,"Can't run %s: %s\n",command , strerror(errno));
-		return retval;
+		exit(retval);
 	} else {
 		waitpid(pid, &status, 0);
-		printf("pid status: %i\n",status);
 	}
-	return 0;
+	return status;
 }
 
 const char *

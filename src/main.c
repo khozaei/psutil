@@ -1,11 +1,18 @@
 #include "psutil.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 int
 main(int argc, char *argv[])
 {
-	execute_command("ls",4,"-l","-a","--color=auto","-h",(char *)NULL);
+	int retval;
 
+	retval = execute_command("ls",5,"-l","-a","--color=auto","-h","/var");
+	if (retval != 0){
+		printf("not successful run!\n");
+	} else{
+		printf("successful run.\n");
+	}
 	return 0;
 }
