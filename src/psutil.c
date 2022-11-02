@@ -16,7 +16,7 @@ pre_excecute_set_path (const unsigned int path_count, ...)
 }
 
 int
-execute_command(const char *command, char *out_error_msg, const uint16_t error_size,
+_execute_command(const char *command, char *out_error_msg, const uint16_t error_size,
 				char *out_cmd_output, const uint16_t cmd_output_size,
 				const unsigned int arg_count, ...)
 {
@@ -55,7 +55,6 @@ execute_command(const char *command, char *out_error_msg, const uint16_t error_s
 		close (pipe_fd[0]);
 		close (pipe_fd[1]);
 		retval = execvp(command, &argument_array[0]);
-		fprintf(stderr,"Can't run %s: %s\n",command , strerror(errno));
 		if (error_buffer != NULL){
 			strncpy (error_buffer, strerror(errno), error_size);
 		}
