@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 
 void
 pre_excecute_set_path (const unsigned int path_count, ...)
@@ -24,7 +25,12 @@ execute_command(const char *command, char *out_error_msg, const uint16_t error_s
 	int status, retval;
 	int pipe_fd[2];
 	char *argument_array[arg_count + 2];
+	char *error_buffer;
 
+	if (error_size > 0 && out_error_msg != NULL) {
+		error_buffer = mmap(NULL, error_size, PROT_READ | PROT_WRITE,
+							MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+	}
 	retval = pipe(pipe_fd);
 	if (retval < 0){
 		fprintf(stderr, "Can't create pipe: %s", strerror(errno));
@@ -50,11 +56,18 @@ execute_command(const char *command, char *out_error_msg, const uint16_t error_s
 		close (pipe_fd[1]);
 		retval = execvp(command, &argument_array[0]);
 		fprintf(stderr,"Can't run %s: %s\n",command , strerror(errno));
+		if (error_buffer != NULL){
+			strncpy (error_buffer, strerror(errno), error_size);
+		}
 		exit(retval);
 	} else {
 		close (pipe_fd[1]);
 		if (cmd_output_size > 0 && out_cmd_output != NULL){
 			read (pipe_fd[0], out_cmd_output, cmd_output_size);
+		}
+		if (error_buffer != NULL) {
+			strncpy (out_error_msg, error_buffer, error_size);
+			munmap(error_buffer, error_size);
 		}
 		waitpid(pid, &status, 0);
 	}
