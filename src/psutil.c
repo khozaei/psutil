@@ -19,9 +19,15 @@ execute_command(const char *command, const unsigned int arg_count, ...)
 {
 	va_list va_ptr;
 	pid_t pid;
-	int status;
+	int status, retval;
+	int pipe_fd[2];
 	char *argument_array[arg_count + 2];
 
+	retval = pipe(pipe_fd);
+	if (retval < 0){
+		fprintf(stderr, "Can't create pipe: %s", strerror(errno));
+		return retval;
+	}
 	argument_array[0] = (char *)command;
 	va_start(va_ptr, arg_count);
 	for(int i = 1; i <= arg_count; i++){
@@ -29,10 +35,6 @@ execute_command(const char *command, const unsigned int arg_count, ...)
 	}
 	va_end(va_ptr);
 	argument_array[arg_count + 1] = (char *)NULL;
-	for(int i = 0; i <= arg_count + 1; i++){
-		printf(">%s\t",argument_array[i]);		
-	}
-	printf("\n");
 	pid = fork();
 	if (pid < 0) {
 		fprintf(stderr,"Can't fork: %s\n", strerror(errno));
@@ -41,10 +43,14 @@ execute_command(const char *command, const unsigned int arg_count, ...)
 	else if (pid == 0) {
 		int retval;
 
+		dup2 (pipe_fd[1], STDOUT_FILENO);
+		close (pipe_fd[0]);
+		close (pipe_fd[1]);
 		retval = execvp(command, &argument_array[0]);
 		fprintf(stderr,"Can't run %s: %s\n",command , strerror(errno));
 		exit(retval);
 	} else {
+		close (pipe_fd[1]);
 		waitpid(pid, &status, 0);
 	}
 	return status;
