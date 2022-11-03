@@ -50,13 +50,14 @@ _execute_command(const char *command, char *out_error_msg, const uint16_t error_
 	}
 	else if (pid == 0) {
 		int retval;
+		int errcode;
 
 		dup2 (pipe_fd[1], STDOUT_FILENO);
 		close (pipe_fd[0]);
 		close (pipe_fd[1]);
 		retval = execvp(command, &argument_array[0]);
 		if (error_buffer != NULL){
-			strncpy (error_buffer, strerror(errno), error_size);
+			snprintf (error_buffer, error_size, "%s: %s", command, strerror(errno));
 		}
 		exit(retval);
 	} else {
@@ -64,11 +65,11 @@ _execute_command(const char *command, char *out_error_msg, const uint16_t error_
 		if (cmd_output_size > 0 && out_cmd_output != NULL){
 			read (pipe_fd[0], out_cmd_output, cmd_output_size);
 		}
+		waitpid(pid, &status, 0);
 		if (error_buffer != NULL) {
-			strncpy (out_error_msg, error_buffer, error_size);
+			snprintf (out_error_msg, error_size,"%s", error_buffer);
 			munmap(error_buffer, error_size);
 		}
-		waitpid(pid, &status, 0);
 	}
 	return status;
 }

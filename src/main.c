@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int
 main(int argc, char *argv[])
@@ -24,7 +25,7 @@ main(int argc, char *argv[])
 	} else{
 		printf("successful run.\n");
 	}
-	retval = execute_command_get_error("lsdfsdf", buffer , 1024, 
+	retval = execute_command_get_error ("laas", buffer , 1024, 
 						  5,"-l","-a","--color=auto","-h","/var");
 	if (retval != 0){
 		printf("not successful run!\n");
