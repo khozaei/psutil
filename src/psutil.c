@@ -145,7 +145,6 @@ process_execute (Process *process, const unsigned int arg_count, ...)
 	}
 	else if (pid == 0) {
 		int retval;
-		int errcode;
 
 		dup2 (pipe_fd[1], STDOUT_FILENO);
 		close (pipe_fd[0]);
