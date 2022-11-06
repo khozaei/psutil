@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2022, Amin Khozaei <amin.khozaei@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ */
 #include <stdint.h>
 
 #define DEFAULT_BUFFER_LEN 1024
