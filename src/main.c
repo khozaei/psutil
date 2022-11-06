@@ -8,39 +8,18 @@ int
 main(int argc, char *argv[])
 {
 	int retval;
-	char buffer[1024];
-	char err_buf[512];
+	Process *process;
 
-	retval = execute_command_get_output("ls", buffer , 1024, 
-						  5,"-l","-a","--color=auto","-h","/var");
+	process = process_new("ls",0,1024);
+	if (!process)
+		return -1;
+	retval = process_execute (process, 5, "-l", "-a", "--color=auto", "-h", "/var");
 	if (retval != 0){
 		printf("not successful run!\n");
 	} else{
 		printf("successful run.\n");
-		printf("output:\n%s\n", buffer);
+		printf("output:\n%s\n", process->output);
 	}
-	retval = execute_command_simple("ls", 5,"-l","-a","--color=auto","-h","/var");
-	if (retval != 0){
-		printf("not successful run!\n");
-	} else{
-		printf("successful run.\n");
-	}
-	retval = execute_command_get_error ("laas", buffer , 1024, 
-						  5,"-l","-a","--color=auto","-h","/var");
-	if (retval != 0){
-		printf("not successful run!\n");
-		printf("command error: %s\n", buffer);
-	} else{
-		printf("successful run.\n");
-	}
-	retval = execute_command("laas",err_buf, 512, buffer , 1024, 
-						  5,"-l","-a","--color=auto","-h","/var");
-	if (retval != 0){
-		printf("not successful run!\n");
-		printf("command error: %s\n", err_buf);
-	} else{
-		printf("successful run.\n");
-		printf("output:\n%s\n", buffer);
-	}
+	process_destroy (process);
 	return 0;
 }
