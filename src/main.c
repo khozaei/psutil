@@ -13,6 +13,7 @@ main(int argc, char *argv[])
 	process = process_new("ls",0,1024);
 	if (!process)
 		return -1;
+	retval = process_set_path (1, "/bin");
 	retval = process_execute (process, 5, "-l", "-a", "--color=auto", "-h", "/var");
 	if (retval != 0){
 		printf("not successful run!\n");
